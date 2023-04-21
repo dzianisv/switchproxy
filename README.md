@@ -39,3 +39,8 @@ curl --proxy http://127.0.0.1:8080 http://example.domain1.com
 ```
 
 Replace http://example.domain1.com with the URL you want to request through the proxy server. Make sure the domain you use matches one of the rules in your configuration file.
+
+## Installation
+```bash
+go install github.com/dzianisv/switchproxy/cmd/switchproxy@v0.0.1
+```
