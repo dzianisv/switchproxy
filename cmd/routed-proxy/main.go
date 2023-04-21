@@ -71,7 +71,7 @@ func main() {
 	})
 
 	log.Printf("Starting proxy server on %s", ":8080")
-	if err := http.ListenAndServe(":8080", proxy); err != nil {
+	if err := http.ListenAndServe(config.Listen, proxy); err != nil {
 		log.Fatalf("Error starting proxy server: %v", err)
 	}
 }

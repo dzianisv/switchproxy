@@ -12,7 +12,8 @@ type Rule struct {
 }
 
 type Config struct {
-	Rules []Rule `yaml:"rules"`
+	Rules  []Rule `yaml:"rules"`
+	Listen string `yaml:"listen"`
 }
 
 func parseConfig(filename string) (Config, error) {
@@ -26,6 +27,10 @@ func parseConfig(filename string) (Config, error) {
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
 		return config, err
+	}
+
+	if config.Listen == "" {
+		config.Listen = "127.0.0.1:8080"
 	}
 
 	return config, nil
