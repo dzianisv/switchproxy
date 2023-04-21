@@ -42,5 +42,5 @@ Replace http://example.domain1.com with the URL you want to request through the 
 
 ## Installation
 ```bash
-go install github.com/dzianisv/switchproxy/cmd/switchproxy@v0.0.1
+curl "https://raw.githubusercontent.com/dzianisv/switchproxy/main/scripts/install.sh" | bash
 ```
