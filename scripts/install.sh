@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install the switchproxy binary
-GO111MODULE=on go install github.com/dzianisv/switchproxy/cmd/switchproxy@v0.0.1
+GO111MODULE=on go install github.com/dzianisv/switchproxy/cmd/switchproxy@v0.0.2
 
 # Create a default configuration file if it doesn't exist
 CONFIG_DIR="${HOME}/.config/switchproxy"
