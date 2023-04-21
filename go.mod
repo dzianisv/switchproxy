@@ -1,4 +1,4 @@
-module github.com/dzianisv/routed-proxy
+module github.com/dzianisv/switchproxy
 
 go 1.19
 

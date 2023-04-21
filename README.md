@@ -1,4 +1,4 @@
-# Go HTTP Proxy Server
+# `switchproxy` Server
 
 A customizable HTTP proxy server written in Go, capable of handling requests to different domains by routing them to different upstream proxy servers or handling them locally.
 
@@ -30,7 +30,7 @@ rules:
 ### Usage
 Start the proxy server:
 ```bash
-routed-proxy -config path/to/your/config.yaml
+switchproxy -config path/to/your/config.yaml
 ```
 
 Test the proxy server with curl:
