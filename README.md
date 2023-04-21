@@ -44,3 +44,11 @@ Replace http://example.domain1.com with the URL you want to request through the 
 ```bash
 curl "https://raw.githubusercontent.com/dzianisv/switchproxy/main/scripts/install.sh" | bash
 ```
+
+## Service Controll
+```bash
+# Unload service
+launchctl unload "${HOME}/Library/LaunchAgents/com.dzianisv.switchproxy.plist"
+# Load service
+launchctl load -w "${HOME}/Library/LaunchAgents/com.dzianisv.switchproxy.plist"
+```
