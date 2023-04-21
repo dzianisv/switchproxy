@@ -1,0 +1,7 @@
+rules:
+  - proxy: http://proxy1:8080
+    domains:
+    - ".*google\\.com"
+  - proxy: local
+    domains:
+      - ".*"
