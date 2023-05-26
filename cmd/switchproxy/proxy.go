@@ -31,7 +31,6 @@ func getMatchingRule(config *Config, host string) *Rule {
 }
 
 func connectProxy(protocol string, addr string, proxyURL string) (net.Conn, error) {
-	log.Printf("connectProxy() %s://%s over %s", protocol, addr, proxyURL)
 	upstreamProxy, err := url.Parse(proxyURL)
 	if err != nil {
 		return nil, err
@@ -77,9 +76,11 @@ func serveProxy(config *Config) error {
 	proxy.ConnectDial = func(protocol string, addr string) (net.Conn, error) {
 		rule := getMatchingRule(config, addr)
 		log.Printf("ConnectDial() %s://%s, rule: %v", protocol, addr, rule)
-		if rule != nil && rule.Proxy != "local" {
+		if rule == nil || rule.Proxy != "local" {
+			log.Printf("Proxying %s over upstream proxy \"%s\"", addr, rule.Proxy)
 			return connectProxy(protocol, addr, rule.Proxy)
 		} else {
+			log.Printf("Proxying %s directly", addr)
 			return net.Dial(protocol, addr)
 		}
 	}
@@ -100,7 +101,10 @@ func serveProxy(config *Config) error {
 			proxy.Tr = &http.Transport{
 				Proxy: http.ProxyURL(upstreamProxy),
 			}
+
+			log.Printf("Proxying %s over upstream proxy \"%s\"", req.URL.Hostname(), rule.Proxy)
 		} else {
+			log.Printf("Proxying %s directly", req.URL.Hostname())
 			proxy.Tr, _ = http.DefaultTransport.(*http.Transport)
 		}
 
