@@ -16,22 +16,22 @@ type Config struct {
 	Listen string `yaml:"listen"`
 }
 
-func parseConfig(filename string) (Config, error) {
+func parseConfig(filename string) (*Config, error) {
 	var config Config
 
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return config, err
+		return &config, err
 	}
 
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
-		return config, err
+		return &config, err
 	}
 
 	if config.Listen == "" {
 		config.Listen = "127.0.0.1:8080"
 	}
 
-	return config, nil
+	return &config, nil
 }
