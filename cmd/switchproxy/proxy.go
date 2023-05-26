@@ -30,7 +30,8 @@ func getMatchingRule(config *Config, host string) *Rule {
 	return nil
 }
 
-func connectProxy(network string, addr string, proxyURL string) (net.Conn, error) {
+func connectProxy(protocol string, addr string, proxyURL string) (net.Conn, error) {
+	log.Printf("connectProxy() %s://%s over %s", protocol, addr, proxyURL)
 	upstreamProxy, err := url.Parse(proxyURL)
 	if err != nil {
 		return nil, err
@@ -73,16 +74,18 @@ func serveProxy(config *Config) error {
 
 	proxy := goproxy.NewProxyHttpServer()
 
-	proxy.ConnectDial = func(network string, addr string) (net.Conn, error) {
+	proxy.ConnectDial = func(protocol string, addr string) (net.Conn, error) {
 		rule := getMatchingRule(config, addr)
-		if rule != nil || rule.Proxy != "local" {
-			return connectProxy(network, addr, rule.Proxy)
+		log.Printf("ConnectDial() %s://%s, rule: %v", protocol, addr, rule)
+		if rule != nil && rule.Proxy != "local" {
+			return connectProxy(protocol, addr, rule.Proxy)
 		} else {
-			return net.Dial(network, addr)
+			return net.Dial(protocol, addr)
 		}
 	}
 
 	proxy.OnRequest().DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
+		log.Printf("OnRequest() %s %s", req.Method, req.Host)
 		if req.Method == http.MethodConnect {
 			return req, nil
 		}

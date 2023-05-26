@@ -13,7 +13,9 @@ import (
 
 func TestServeProxy(t *testing.T) {
 	// Start the proxy server
-	go serveProxy(&Config{Listen: "localhost:8080", Rules: []Rule{
+	proxyAddress := "localhost:8081"
+
+	go serveProxy(&Config{Listen: proxyAddress, Rules: []Rule{
 		{
 			Domains: []string{
 				".*",
@@ -24,14 +26,14 @@ func TestServeProxy(t *testing.T) {
 
 	// Wait for server to start up
 	for {
-		conn, err := net.Dial("tcp", "localhost:8080")
+		conn, err := net.Dial("tcp", proxyAddress)
 		if err == nil {
 			conn.Close()
 			break
 		}
 	}
 
-	proxyURL, err := url.Parse("http://localhost:8080")
+	proxyURL, err := url.Parse(fmt.Sprintf("http://%s", proxyAddress))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,21 +53,24 @@ func TestServeProxy(t *testing.T) {
 		Transport: transport,
 	}
 
-	resp, err := client.Get("https://ifconfig.me")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer resp.Body.Close()
+	for _, testUrl := range []string{"http://ifconfig.me", "https://ifconfig.me"} {
+		log.Printf("[%s] sending GET", testUrl)
+		resp, err := client.Get(testUrl)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
 
-	// Check response status code
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("unexpected status code %v", resp.StatusCode)
-	}
+		// Check response status code
+		if resp.StatusCode != http.StatusOK {
+			t.Errorf("unexpected status code %v", resp.StatusCode)
+		}
 
-	// Print out the response
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatal(err)
+		// Print out the response
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		log.Printf("[%s] Response body: %s\n", testUrl, string(body))
 	}
-	fmt.Printf("Response body: %s\n", string(body))
 }
