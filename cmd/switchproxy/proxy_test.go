@@ -1,13 +1,14 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
 	"testing"
+	"time"
 )
 
 func TestServeProxy(t *testing.T) {
@@ -15,7 +16,7 @@ func TestServeProxy(t *testing.T) {
 	go serveProxy(&Config{Listen: "localhost:8080", Rules: []Rule{
 		{
 			Domains: []string{
-				"*",
+				".*",
 			},
 			Proxy: "local",
 		},
@@ -30,19 +31,26 @@ func TestServeProxy(t *testing.T) {
 		}
 	}
 
-	// Configure the transport to use the proxy
-	transport := &http.Transport{
-		Proxy: http.ProxyURL(&url.URL{
-			Scheme: "http",
-			Host:   "localhost:8080",
-		}),
-		DialContext: func(ctx context.Context, network string, addr string) (net.Conn, error) {
-			return net.Dial("tcp", "ifconfig.me:80")
-		},
+	proxyURL, err := url.Parse("http://localhost:8080")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	// Make the request using the transport
-	client := &http.Client{Transport: transport}
+	// Create a transport
+	transport := &http.Transport{
+		Proxy: http.ProxyURL(proxyURL),
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+
+	// Create a client
+	client := &http.Client{
+		Transport: transport,
+	}
+
 	resp, err := client.Get("https://ifconfig.me")
 	if err != nil {
 		t.Fatal(err)
