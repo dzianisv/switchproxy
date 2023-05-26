@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 
 	"log"
@@ -72,6 +73,15 @@ func ConnectProxy(network string, addr string, proxyURL string) (net.Conn, error
 }
 
 func main() {
+	if len(os.Args) > 1 {
+		if os.Args[1] == "reload" {
+			serviceReload()
+		} else if os.Args[1] == "start" {
+			serviceStart()
+		} else if os.Args[1] == "stop" {
+			serviceStop()
+		}
+	}
 	configPath := flag.String("config", "config.yaml", "Path to the configuration file")
 	flag.Parse()
 
