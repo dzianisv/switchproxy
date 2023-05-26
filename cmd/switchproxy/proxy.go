@@ -50,8 +50,9 @@ func connectProxy(protocol string, addr string, proxyURL string) (net.Conn, erro
 
 	if upstreamProxy.User != nil {
 		password, _ := upstreamProxy.User.Password()
-		auth := base64.StdEncoding.EncodeToString([]byte(upstreamProxy.User.Username() + ":" + password))
-		connectReq.Header.Set("Proxy-Authorization", "Basic "+auth)
+		token := base64.StdEncoding.EncodeToString([]byte(upstreamProxy.User.Username() + ":" + password))
+		log.Printf("Authorization token: %s", token)
+		connectReq.Header.Set("Proxy-Authorization", "Basic "+token)
 	}
 
 	connectReq.Write(proxyConn)
@@ -59,6 +60,7 @@ func connectProxy(protocol string, addr string, proxyURL string) (net.Conn, erro
 	resp, err := http.ReadResponse(br, connectReq)
 	if err != nil {
 		proxyConn.Close()
+		log.Printf("ReadResponse error: %s", err)
 		return nil, err
 	}
 	if resp.StatusCode != 200 {
@@ -98,8 +100,17 @@ func serveProxy(config *Config) error {
 				log.Printf("Error parsing proxy URL for %s: %v", req.URL.Host, err)
 				return req, goproxy.NewResponse(req, goproxy.ContentTypeText, http.StatusInternalServerError, "Error parsing proxy URL")
 			}
+
 			proxy.Tr = &http.Transport{
-				Proxy: http.ProxyURL(upstreamProxy),
+				Proxy:              http.ProxyURL(upstreamProxy),
+				ProxyConnectHeader: http.Header{},
+			}
+
+			if upstreamProxy.User != nil {
+				password, _ := upstreamProxy.User.Password()
+				token := base64.StdEncoding.EncodeToString([]byte(upstreamProxy.User.Username() + ":" + password))
+				log.Printf("Authorization token: %s", token)
+				proxy.Tr.ProxyConnectHeader.Set("Proxy-Authorization", "Basic "+token)
 			}
 
 			log.Printf("Proxying %s over upstream proxy \"%s\"", req.URL.Hostname(), rule.Proxy)
