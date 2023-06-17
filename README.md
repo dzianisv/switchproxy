@@ -52,3 +52,7 @@ launchctl unload "${HOME}/Library/LaunchAgents/com.dzianisv.switchproxy.plist"
 # Load service
 launchctl load -w "${HOME}/Library/LaunchAgents/com.dzianisv.switchproxy.plist"
 ```
+
+## Blocking AD domains
+
+List of domains to block https://github.com/StevenBlack/hosts/blob/master/alternates/fakenews-gambling-porn-social/readme.md

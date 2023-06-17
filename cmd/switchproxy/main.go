@@ -15,7 +15,10 @@ func main() {
 			serviceStart()
 		} else if os.Args[1] == "stop" {
 			serviceStop()
+		} else if os.Args[1] == "install" {
+			serviceInstall()
 		}
+		return
 	}
 	configPath := flag.String("config", "config.yaml", "Path to the configuration file")
 	flag.Parse()

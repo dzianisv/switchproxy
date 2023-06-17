@@ -51,7 +51,6 @@ func connectProxy(protocol string, addr string, proxyURL string) (net.Conn, erro
 	if upstreamProxy.User != nil {
 		password, _ := upstreamProxy.User.Password()
 		token := base64.StdEncoding.EncodeToString([]byte(upstreamProxy.User.Username() + ":" + password))
-		log.Printf("Authorization token: %s", token)
 		connectReq.Header.Set("Proxy-Authorization", "Basic "+token)
 	}
 
@@ -77,7 +76,6 @@ func serveProxy(config *Config) error {
 
 	proxy.ConnectDial = func(protocol string, addr string) (net.Conn, error) {
 		rule := getMatchingRule(config, addr)
-		log.Printf("ConnectDial() %s://%s, rule: %v", protocol, addr, rule)
 		if rule == nil || rule.Proxy != "local" {
 			log.Printf("Proxying %s over upstream proxy \"%s\"", addr, rule.Proxy)
 			return connectProxy(protocol, addr, rule.Proxy)
@@ -88,7 +86,6 @@ func serveProxy(config *Config) error {
 	}
 
 	proxy.OnRequest().DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-		log.Printf("OnRequest() %s %s", req.Method, req.Host)
 		if req.Method == http.MethodConnect {
 			return req, nil
 		}
@@ -109,7 +106,6 @@ func serveProxy(config *Config) error {
 			if upstreamProxy.User != nil {
 				password, _ := upstreamProxy.User.Password()
 				token := base64.StdEncoding.EncodeToString([]byte(upstreamProxy.User.Username() + ":" + password))
-				log.Printf("Authorization token: %s", token)
 				proxy.Tr.ProxyConnectHeader.Set("Proxy-Authorization", "Basic "+token)
 			}
 
