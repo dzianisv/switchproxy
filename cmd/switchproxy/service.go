@@ -11,27 +11,28 @@ func getServicefile() string {
 	return fmt.Sprintf("%s/Library/LaunchAgents/com.dzianisv.switchproxy.plist", os.Getenv("HOME"))
 }
 
-func serviceReload() {
+func serviceReload() error {
 	serviceStart()
 	serviceStop()
+	return nil
 }
 
-func serviceStart() {
+func serviceStart() error {
 	if runtime.GOOS == "darwin" {
 		exec.Command("launchctl", "load", "-w", getServicefile()).Run()
 	} else {
 		panic("not implemented")
 	}
-	return
+	return nil
 }
 
-func serviceStop() {
+func serviceStop() error {
 	if runtime.GOOS == "darwin" {
 		exec.Command("launchctl", "unload", getServicefile()).Run()
 	} else {
 		panic("not implemented")
 	}
-	return
+	return nil
 }
 
 func serviceInstall() error {

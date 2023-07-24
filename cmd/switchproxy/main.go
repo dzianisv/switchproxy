@@ -2,26 +2,37 @@ package main
 
 import (
 	"flag"
-	"os"
+	"fmt"
 
 	"log"
 )
 
 func main() {
-	if len(os.Args) > 1 {
-		if os.Args[1] == "reload" {
-			serviceReload()
-		} else if os.Args[1] == "start" {
-			serviceStart()
-		} else if os.Args[1] == "stop" {
-			serviceStop()
-		} else if os.Args[1] == "install" {
-			serviceInstall()
+	configPath := flag.String("config", "config.yaml", "Path to the configuration file")
+	actionFlag := flag.String("service", "", "Service action: reload, start, stop, install")
+
+	flag.Parse()
+	var err error
+
+	if len(*actionFlag) != 0 {
+		if *actionFlag == "reload" {
+			err = serviceReload()
+		} else if *actionFlag == "start" {
+			err = serviceStart()
+		} else if *actionFlag == "stop" {
+			err = serviceStop()
+		} else if *actionFlag == "install" {
+			err = serviceInstall()
+		} else {
+			err = fmt.Errorf("Unsupported action %s", *actionFlag)
 		}
+
+		if err != nil {
+			log.Fatalf("failed to %s: %s", *actionFlag, err)
+		}
+
 		return
 	}
-	configPath := flag.String("config", "config.yaml", "Path to the configuration file")
-	flag.Parse()
 
 	config, err := parseConfig(*configPath)
 	if err != nil {
